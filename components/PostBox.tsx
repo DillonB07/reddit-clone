@@ -99,12 +99,12 @@ function PostBox() {
       setValue("postImage", "");
       setValue("subreddit", "");
 
-      toast.success("Congratulations! You have created a awesome post!", {
+      toast.success("Post successfully created!", {
         id: notification,
       });
     } catch (error) {
       console.log(error);
-      toast.error("Whoops! Something went wrong :(", {
+      toast.error("Whoops! Something went wrong", {
         id: notification,
       });
     }
