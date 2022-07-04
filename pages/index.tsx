@@ -11,9 +11,7 @@ const Home: NextPage = () => {
         <title>Reddit 2.0</title>
       </Head>
 
-      <div>
-        <PostBox />
-      </div>
+      <PostBox />
     </div>
   );
 };
