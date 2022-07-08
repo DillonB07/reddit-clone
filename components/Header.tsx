@@ -24,11 +24,13 @@ function Header() {
     <div className="sticky top-0 z-50 flex bg-white px-4 py-2 shadow-sm  items-center">
       <div className="h-10 w-20 relative flex-shrink-0 cursor-pointer">
         <Link href="/">
-          <Image
-            objectFit="contain"
-            src="https://links.papareact.com/fqy"
-            layout="fill"
-          />
+          <a className="">
+            <Image
+              objectFit="contain"
+              src="https://links.papareact.com/fqy"
+              layout="fill"
+            />
+          </a>
         </Link>
       </div>
 
