@@ -37,7 +37,6 @@ function PostBox({ subreddit }: Props) {
   } = useForm<FormData>();
 
   const onSubmit = handleSubmit(async (formData) => {
-    console.log(formData);
     const notification = toast.loading("Creating post...");
     try {
       const {
@@ -52,8 +51,6 @@ function PostBox({ subreddit }: Props) {
       const subredditExists = getSubredditListByTopic.length > 0;
 
       if (!subredditExists) {
-        console.log("Subreddit doesn't exist! Creating it...");
-
         const {
           data: { insertSubreddit: newSubreddit },
         } = await addSubreddit({
@@ -61,8 +58,6 @@ function PostBox({ subreddit }: Props) {
             topic: formData.subreddit,
           },
         });
-
-        console.log("Subreddit created!");
 
         const image = formData.postImage || "";
 
@@ -77,12 +72,7 @@ function PostBox({ subreddit }: Props) {
             username: session?.user?.name,
           },
         });
-
-        console.log("Post created! Data: ", newPost);
       } else {
-        console.log("Subreddit exists! Using it...");
-        console.log(getSubredditListByTopic);
-
         const image = formData.postImage || "";
 
         const {
@@ -96,8 +86,6 @@ function PostBox({ subreddit }: Props) {
             username: session?.user?.name,
           },
         });
-
-        console.log("Post created! Data: ", newPost);
       }
 
       setValue("postBody", "");
@@ -109,7 +97,6 @@ function PostBox({ subreddit }: Props) {
         id: notification,
       });
     } catch (error) {
-      console.log(error);
       toast.error("Whoops! Something went wrong", {
         id: notification,
       });

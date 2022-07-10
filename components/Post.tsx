@@ -79,8 +79,6 @@ const Post = ({ post, comments }: Props) => {
     if (vote && isUpvote) return;
     if (vote === false && !isUpvote) return;
 
-    console.log("Voting", isUpvote);
-
     await addVote({
       variables: {
         post_id: post?.id,
