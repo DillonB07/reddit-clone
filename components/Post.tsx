@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -16,9 +16,9 @@ import Timeago from "react-timeago";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
-import { ADD_COMMENT } from "../graphql/mutations";
-import { useMutation } from "@apollo/client";
-import { GET_POST_BY_POST_ID } from "../graphql/queries";
+import { ADD_COMMENT, ADD_VOTE } from "../graphql/mutations";
+import { useMutation, useQuery } from "@apollo/client";
+import { GET_POST_BY_POST_ID, GET_VOTES_BY_POST_ID } from "../graphql/queries";
 import { useSession } from "next-auth/react";
 
 type Props = {
@@ -34,6 +34,14 @@ const Post = ({ post, comments }: Props) => {
   const router = useRouter();
   const { data: session } = useSession();
 
+  const [vote, setVote] = useState<boolean>();
+  const { data, loading } = useQuery(GET_VOTES_BY_POST_ID, {
+    variables: { post_id: post?.id },
+  });
+  const [addVote] = useMutation(ADD_VOTE, {
+    refetchQueries: [GET_VOTES_BY_POST_ID, "getVotesByPostId"],
+  });
+
   const {
     register,
     setValue,
@@ -47,8 +55,6 @@ const Post = ({ post, comments }: Props) => {
   });
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    // post comment here....
-
     const notification = toast.loading("Posting your comment...");
 
     await addComment({
@@ -63,6 +69,54 @@ const Post = ({ post, comments }: Props) => {
 
     toast.success("Comment succesfully posted!!", { id: notification });
   };
+
+  const upvote = async (isUpvote: boolean) => {
+    if (!session) {
+      toast.error("You need to sign in to vote");
+      return;
+    }
+
+    if (vote && isUpvote) return;
+    if (vote === false && !isUpvote) return;
+
+    console.log("Voting", isUpvote);
+
+    await addVote({
+      variables: {
+        post_id: post?.id,
+        username: session?.user?.name,
+        upvote: isUpvote,
+      },
+    });
+  };
+
+  const displayVotes = (data: any) => {
+    const votes: Vote[] = data?.getVotesByPostId;
+    const displayNumber = votes?.reduce(
+      (total, vote) => (vote?.upvote ? (total += 1) : (total -= 1)),
+      0
+    );
+
+    if (votes?.length === 0) {
+      return 0;
+    }
+
+    if (displayNumber === 0) {
+      return votes[0]?.upvote ? 1 : -1;
+    }
+
+    return displayNumber;
+  };
+
+  useEffect(() => {
+    const votes: Vote[] = data?.getVotesByPostId;
+
+    const vote = votes?.find(
+      (vote) => vote?.username == session?.user?.name
+    )?.upvote;
+
+    setVote(vote);
+  }, [data]);
 
   if (!post)
     return (
@@ -82,9 +136,21 @@ const Post = ({ post, comments }: Props) => {
           <div className="flex flex-row">
             {/* Votes */}
             <div className="flex flex-col items-center justify-start space-y-1 rounded-l-md bg-gray-50 p-4 text-gray-400">
-              <ArrowUpIcon className="voteButtons hover:text-red-400" />
-              <p className="text-xs font-bold text-black">0</p>
-              <ArrowDownIcon className="voteButtons hover:text-blue-400" />
+              <ArrowUpIcon
+                onClick={() => upvote(true)}
+                className={`voteButtons hover:text-red-400 ${
+                  vote && "text-red-400"
+                }`}
+              />
+              <p className={`text-xs font-bold text-black `}>
+                {displayVotes(data)}
+              </p>
+              <ArrowDownIcon
+                onClick={() => upvote(false)}
+                className={`voteButtons hover:text-blue-400 ${
+                  vote === false && "text-blue-400"
+                }`}
+              />
             </div>
             <div className="p-3 pl-1">
               {/* Header */}
@@ -150,7 +216,7 @@ const Post = ({ post, comments }: Props) => {
                     placeholder={
                       session
                         ? `Whats you on your mind?`
-                        : "PLease sign in to comment"
+                        : "Please sign in to comment"
                     }
                   />
                   <button

@@ -1,5 +1,17 @@
 import { gql } from "@apollo/client";
 
+export const GET_VOTES_BY_POST_ID = gql`
+  query GetVotesByPostId($post_id: ID!) {
+    getVotesByPostId(post_id: $post_id) {
+      created_at
+      id
+      post_id
+      upvote
+      username
+    }
+  }
+`;
+
 export const GET_POST_BY_POST_ID = gql`
   query GetPostByPostId($post_id: ID!) {
     getPostListByPostId(post_id: $post_id) {

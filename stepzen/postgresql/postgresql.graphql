@@ -212,6 +212,15 @@ type Mutation {
       configuration: "postgresql_config"
     )
 
+  insertVote(post_id: ID!, username: String!, upvote: Boolean!): Vote
+    @dbquery(
+      type: "postgresql"
+      schema: "public"
+      table: "vote"
+      dml: INSERT
+      configuration: "postgresql_config"
+    )
+
   insertSubreddit(topic: String!): Subreddit
     @dbquery(
       type: "postgresql"
