@@ -1,29 +1,36 @@
-import { useQuery } from "@apollo/client";
-import type { NextPage } from "next";
-import Head from "next/head";
+import { NextPage } from "next";
+import { useMutation, useQuery } from "@apollo/client";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { default as PostComponent } from "../../../../components/Post";
+import React from "react";
+import { default as PostDisplay } from "../../../../components/Post";
 import { GET_POST_BY_POST_ID } from "../../../../graphql/queries";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { ADD_COMMENT } from "../../../../graphql/mutations";
+import toast from "react-hot-toast";
+import Head from "next/head";
+import Avatar from "../../../../components/Avatar";
+import Timeago from "react-timeago";
 
 const Post: NextPage = () => {
   const router = useRouter();
-  console.log("🚀 ~ file: [postid].tsx ~ line 9 ~ PostPage ~ router", router);
+
   const { data, error } = useQuery(GET_POST_BY_POST_ID, {
     variables: {
       post_id: router.query.postId,
     },
   });
 
-  console.log("🚀 ~ file: [postid].tsx ~ line 14 ~ PostPage ~ data", data);
-
   const post: Post = data?.getPostListByPostId;
 
   return (
-    <div className="">
+    <div className="mx-auto my-7 max-w-5xl">
       <Head>
-        <title>Reddit 2.0</title>
+        <title>
+          {post?.title} | r/{post?.subreddit[0]?.topic}
+        </title>
       </Head>
-      <PostComponent post={post} />
+      <PostDisplay post={post} comments />
     </div>
   );
 };
